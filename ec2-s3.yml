@@ -1,0 +1,56 @@
+Parameters:
+  Instancetype: 
+    Type: String
+    Default: t2.micro
+    AllowedValues:
+      - t2.micro
+  KeyName:
+    Type: AWS::EC2::KeyPair::KeyName
+  AMIid:
+    Type: String
+    Default: ami-00c39f71452c08778
+    AllowedValues:
+      - ami-00c39f71452c08778
+      - ami-007855ac798b5175e
+      - ami-00805552fa999b1a0
+  mySubnetIDs:
+    Type: "List<AWS::EC2::Subnet::Id>"
+
+  EnvType:
+    Type: String
+    AllowedValues:
+      - prod
+      - test
+  BucketName:
+    Default: s3buck
+    Type: String
+Conditions:
+  IsProduction: !Equals 
+    - !Ref EnvType
+    - prod
+  CreateBucket: !Not 
+    - !Equals 
+      - !Ref BucketName
+      - s3buck
+  
+Resources:
+  InstanceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup 
+    Properties:
+      GroupDescription: Enable SSH access via port 22
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+  Ec2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: !Ref Instancetype
+      ImageId: !Ref AMIid
+      SubnetId: !Select [ 0, !Ref mySubnetIDs ]
+      SecurityGroupIds: [ !GetAtt InstanceSecurityGroup.GroupId ]
+#outputs:
+ # instanceId:
+ #   description: instanceID
+#    value: !Ref Instancetype
