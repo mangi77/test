@@ -4,5 +4,5 @@ RUN apt install apache2 -y
 RUN echo "hello world" > /var/www/html/index.html
 RUN apt clean
 EXPOSE 80
-ENTRYPOINT ["tail", "-f", "/dev/null"]
+CMD ["apachectl", "-D", "FOREGROUND"]
 
